@@ -1,0 +1,66 @@
+##Author: Mohammad Zaman - mfzhsn
+
+name: sros-services
+
+prefix: ""
+topology:
+  nodes:  
+    pe1:
+      kind: vr-sros
+      image: vr-sros:24.10.R3
+      type: sr-1
+      license: sros_license.txt
+      mgmt-ipv4: 172.20.20.2
+      # startup-config: ./configs/sros1.txt
+      ports:
+        - 50001:22
+        - 50301:57400
+        - 50401:830
+        
+    core:
+      kind: vr-sros
+      image: vr-sros:24.10.R3
+      type: sr-1 
+      license: sros_license.txt
+      mgmt-ipv4: 172.20.20.3
+      # startup-config: ./configs/sros2.txt
+      ports:
+        - 50002:22
+        - 50302:57400
+        - 50402:830
+
+    pe2:
+      kind: vr-sros
+      image: vr-sros:24.10.R3
+      type: sr-1
+      license: sros_license.txt
+      mgmt-ipv4: 172.20.20.4
+      # startup-config: ./configs/sros2.txt
+      ports:
+        - 50003:22
+        - 50303:57400
+        - 50403:830
+
+    host1:
+      kind: linux
+      image: ghcr.io/mfzhsn/network-multitool-sshd:0.0.2
+      mgmt-ipv4: 172.20.20.10
+      exec:
+        - ip addr add 192.168.1.1/24 dev eth1
+        - ip link set eth1 up
+
+    host2:
+      kind: linux
+      image: ghcr.io/mfzhsn/network-multitool-sshd:0.0.2
+      mgmt-ipv4: 172.20.20.11
+      exec:
+        - ip addr add 192.168.1.2/24 dev eth1
+        - ip link set eth1 up
+  
+  links:
+    - endpoints: [pe1:eth1, core:eth1]
+    - endpoints: [pe2:eth2, core:eth2]
+    #CE-1 to PE1
+    - endpoints: [pe1:eth10, host1:eth1]
+    #CE-2 to PE2
+    - endpoints: [pe2:eth10, host2:eth1]
